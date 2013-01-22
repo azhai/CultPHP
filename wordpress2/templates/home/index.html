@@ -1,0 +1,59 @@
+{% extends 'public/base.html' %}
+
+ {% block content %}
+
+{% for article in articles%}
+<article id="post-{{ article.ID }}" class="post-{{ article.ID }} post type-post status-publish format-standard hentry category-design tag-css tag-font-size tag-83">
+    <header class="entry-header">
+        <h1 class="entry-title">
+            <a href="?module=article&action=show&id={{ article.ID }}" title="链向 {{ article.post_title }} 的固定链接" rel="bookmark">{{ article.post_title }}</a>
+        </h1>
+        {% if article.comment_count > 0 %}
+        <div class="comments-link">
+            <a href="?module=article&action=show&id={{ article.ID }}#comments" title="《{{ article.post_title }}》上的评论">{{ article.comment_count }} 条回复</a>
+        </div><!-- .comments-link -->
+        {% endif %}
+    </header><!-- .entry-header -->
+
+    <div class="entry-content">
+        <p>
+{{ article.post_content|less }}
+        <br /><a href="?module=article&action=show&id={{ article.ID }}#more-{{ article.ID }}" class="more-link">继续阅读 <span class="meta-nav">&rarr;</span></a>
+        </p>
+    </div><!-- .entry-content -->
+    
+    <footer class="entry-meta">
+        本条目发布于 <a href="{{ site_url }}?p={{ article.ID }}" title="{{ article.post_date|date('H:i') }}" rel="bookmark"><time class="entry-date" datetime="{{ article.post_date|date('Y-m-d\\TH:i:sP') }}">{{ article.post_date|date('Y-m-d') }}</time></a>。
+        属于
+        {% for category in article.categories %}
+        {%- if not loop.first -%}、{%- endif -%}
+        <a href="{{ site_url }}?cat={{ category.term_id }}" title="查看 {{ category.name }} 中的全部文章" rel="category">{{ category.name }}</a>
+        {% endfor %}
+        分类
+        {%- if article.tags -%}
+            ，被贴了
+            {% for tag in article.tags %}
+            {%- if not loop.first -%}、{%- endif -%}
+            <a href="{{ site_url }}?tag={{ tag.slug }}" rel="tag">{{ tag.name }}</a>
+            {% endfor %}
+            标签
+        {%- endif -%}。
+        <span class="by-author">作者是 <span class="author vcard"><a class="url fn n" href="{{ site_url }}?author={{ article.post_author }}" title="查看所有由 {{ article.author_name }} 发布的文章" rel="author">{{ article.author_name }}</a></span>。</span>
+    </footer><!-- .entry-meta -->
+</article><!-- #post -->
+{% endfor %}
+            
+<nav id="nav-below" class="navigation" role="navigation">
+    <h3 class="assistive-text">文章导航</h3>
+    <div class="nav-previous alignleft">
+        {%- if next_page -%}
+        <a href="{{ site_url }}?paged={{ paged + 1 }}" ><span class="meta-nav">&larr;</span> 早期文章</a>
+        {%- endif -%}
+    </div>
+    <div class="nav-next alignright">
+        {%- if paged > 1 -%}
+        <a href="{{ site_url }}?paged={{ paged - 1 }}" >较晚文章 <span class="meta-nav">&rarr;</span></a>
+        {%- endif -%}
+    </div>
+</nav><!-- #nav-below .navigation -->
+{% endblock %}

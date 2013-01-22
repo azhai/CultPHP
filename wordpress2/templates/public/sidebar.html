@@ -1,0 +1,57 @@
+
+<aside id="search-2" class="widget widget_search">
+    <form role="search" method="get" id="searchform" action="{{ site_url }}" >
+    <div>
+        <label class="screen-reader-text" for="s">搜索：</label>
+        <input type="text" value="" name="s" id="s" />
+        <input type="submit" id="searchsubmit" value="搜索" />
+    </div>
+    </form>
+</aside>     
+    
+<aside id="recent-posts-2" class="widget widget_recent_entries">        
+    <h3 class="widget-title">近期文章</h3>      
+    <ul>
+        {%- for article in recent_articles -%}
+        <li><a href="{{ site_url }}?p={{ article.ID }}" title="{{ article.post_title }}">{{ article.post_title }}</a></li>
+        {%- endfor -%}
+    </ul>
+</aside>
+        
+<aside id="recent-comments-2" class="widget widget_recent_comments">
+    <h3 class="widget-title">近期评论</h3>
+    <ul id="recentcomments">
+        {%- for comment in recent_comments -%}
+        <li class="recentcomments">{{ comment.comment_author }} 发表在《<a href="{{ site_url }}?p={{ comment.comment_post_ID }}#comment-{{ comment.comment_ID }}">{{ comment.post_title }}</a>》</li>
+        {%- endfor -%}
+    </ul>
+</aside>
+        
+<aside id="archives-2" class="widget widget_archive">
+    <h3 class="widget-title">文章归档</h3>    
+    <ul>
+        {%- for archive in archives -%}
+        <li><a href="{{ site_url }}?m={{ archive.post_date|date('Ym') }}" title="{{ archive.post_date|date('Y年n月') }}">{{ archive.post_date|date('Y年n月') }}</a></li>
+        {%- endfor -%}
+    </ul>
+</aside>
+
+<aside id="categories-2" class="widget widget_categories">
+    <h3 class="widget-title">分类目录</h3>        
+    <ul>
+        {%- for category in categories -%}
+        <li class="cat-item cat-item-{{ category.term_id }}"><a href="{{ site_url }}?cat={{ category.term_id }}" title="category.term_slug">{{ category.term_name }}</a>
+        {%- endfor -%}
+    </li>
+    </ul>
+</aside>
+
+<aside id="meta-2" class="widget widget_meta">
+    <h3 class="widget-title">功能</h3>          
+    <ul>
+        <li><a href="{{ site_url }}wp-login.php">登录</a></li>
+        <li><a href="{{ site_url }}?feed=rss2" title="使用 RSS 2.0 订阅本站点内容">文章 <abbr title="Really Simple Syndication">RSS</abbr></a></li>
+        <li><a href="{{ site_url }}?feed=comments-rss2" title="使用 RSS 订阅本站点的所有文章的近期评论">评论 <abbr title="Really Simple Syndication">RSS</abbr></a></li>
+        <li><a href="http://cn.wordpress.org/" title="基于 WordPress，一个优美、先进的个人信息发布平台。">WordPress.org</a></li>
+    </ul>
+</aside>

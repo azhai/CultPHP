@@ -1,0 +1,45 @@
+{% extends 'public/base.html' %}
+        
+{% block content %}                
+<article id="post-{{ article.ID }}" class="post-{{ article.ID }} post type-post status-publish format-standard hentry category-software">
+    <header class="entry-header">
+        <h1 class="entry-title">{{ article.post_title }}</h1>
+        <div class="comments-link">
+            <a href="?module=article&action=show&id={{ article.ID }}#respond" title="《{{ article.post_title }}》上的评论"><span class="leave-reply">发表回复</span></a>
+        </div><!-- .comments-link -->
+    </header><!-- .entry-header -->
+
+    <div class="entry-content">
+        <p>
+{% autoescape 'html' %}{{ article.post_content|escape }}{% endautoescape %}
+        </p>
+    </div><!-- .entry-content -->
+        
+    <footer class="entry-meta">
+        本条目发布于 <a href="?module=article&action=show&id={{ article.ID }}" title="{{ article.post_date|date('H:i') }}" rel="bookmark"><time class="entry-date" datetime="{{ article.post_date|date('Y-m-d\\TH:i:sP') }}">{{ article.post_date|date('Y-m-d') }}</time></a>。
+        属于
+        {% for category in article.categories %}
+        {%- if not loop.first -%}、{%- endif -%}
+        <a href="{{ site_url }}?cat={{ category.term_id }}" title="查看 {{ category.name }} 中的全部文章" rel="category">{{ category.name }}</a>
+        {% endfor %}
+        分类
+        {%- if article.tags -%}
+            ，被贴了
+            {% for tag in article.tags %}
+            {%- if not loop.first -%}、{%- endif -%}
+            <a href="{{ site_url }}?tag={{ tag.slug }}" rel="tag">{{ tag.name }}</a>
+            {% endfor %}
+            标签
+        {%- endif -%}。
+        <span class="by-author">作者是 <span class="author vcard"><a class="url fn n" href="{{ site_url }}?author={{ article.post_author }}" title="查看所有由 {{ article.author_name }} 发布的文章" rel="author">{{ article.author_name }}</a></span>。</span>
+    </footer><!-- .entry-meta -->
+</article><!-- #post -->
+
+<nav class="nav-single">
+    <h3 class="assistive-text">文章导航</h3>
+    <span class="nav-previous"><a href="{{ site_url }}?p=1" rel="prev"><span class="meta-nav">←</span>My First Post</a></span>
+    <span class="nav-next"></span>
+</nav><!-- .nav-single -->
+
+{% include 'public/post_comment.html' %}
+{% endblock %}
