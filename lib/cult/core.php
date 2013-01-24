@@ -242,6 +242,9 @@ class Templater
 {
     public $template_dir = '';
     public $cache_dir = '';
+    private $files = array();
+    private $blocks = array();
+    private $current_block = '';
 
     public function __construct($template_dir, $cache_dir='')
     {
@@ -254,7 +257,37 @@ class Templater
         extract($context);
         ob_start();
         include $this->template_dir . DS . $template_file;
+        if (! empty($this->files)) {
+            $layout_file = array_pop($this->files);
+            foreach ($this->files as $file) {
+                include $this->template_dir . DS . $file;
+            }
+            extract($this->blocks);
+            include $this->template_dir . DS . $layout_file;
+        }
         return ob_get_clean();
+    }
+
+    public function include_tpl($template_file, array $context=array())
+    {
+        extract($context);
+        include $this->template_dir . DS . $template_file;
+    }
+
+    public function extend_tpl($template_file)
+    {
+        array_push($this->files, $template_file);
+    }
+
+    public function block_start($block_name='content')
+    {
+        $this->current_block = $block_name;
+        ob_start();
+    }
+
+    public function block_end()
+    {
+        $this->blocks[ $this->current_block ] = ob_get_clean();
     }
 }
 
@@ -377,7 +410,7 @@ class Database extends PDO
 /**
  * 加载器
  */
-class Loader extends Storage
+class Loader
 {
     public function get_templater($master=null)
     {

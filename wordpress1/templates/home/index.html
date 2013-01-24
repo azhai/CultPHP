@@ -1,4 +1,7 @@
-<?php ob_start(); ?>
+<?php 
+$this->extend_tpl('public/base.html'); 
+$this->block_start('content');
+?>
 
 <?php foreach ($articles as $article) { ?>
 <article id="post-<?php echo $article->ID ?>" class="post-<?php echo $article->ID ?> post type-post status-publish format-standard hentry category-design tag-css tag-font-size tag-83">
@@ -54,7 +57,7 @@
         <?php } ?>
     </div>
 </nav><!-- #nav-below .navigation -->
+
 <?php
-$content = ob_get_clean();
-include $this->template_dir . DS . 'public/base.html';
+$this->block_end();
 ?>

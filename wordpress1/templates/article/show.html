@@ -1,4 +1,7 @@
-<?php ob_start(); ?>
+<?php 
+$this->extend_tpl('public/base.html'); 
+$this->block_start('content');
+?>
            
 <article id="post-<?php echo $article->ID ?>" class="post-<?php echo $article->ID ?> post type-post status-publish format-standard hentry category-software">
     <header class="entry-header">
@@ -39,8 +42,8 @@
     <span class="nav-previous"><a href="<?php echo $site_url ?>?p=1" rel="prev"><span class="meta-nav">←</span>My First Post</a></span>
     <span class="nav-next"></span>
 </nav><!-- .nav-single -->
+
 <?php
 include $this->template_dir . DS . 'public/post_comment.html';
-$content = ob_get_clean();
-include $this->template_dir . DS . 'public/base.html';
+$this->block_end();
 ?>
