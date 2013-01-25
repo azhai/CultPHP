@@ -1,16 +1,27 @@
 <?php
 
+require_once LIBRARY_DIR . DS . 'cult' . DS . 'string.php';
 require_once LIBRARY_DIR . DS . 'cult' . DS . 'orm.php';
 
+
 /*只显示分页符之前的文章内容*/
-function less_content($content)
-{
-    $contents = explode('<!--more-->', $content);
-    return is_array($contents) ? array_shift($contents) : $contents;
+function less_content($content, $article_id){
+    if ( preg_match('/<!--more(.*?)?-->/', $content, $matches) ) {
+        list($content, $extended) = explode($matches[0], $content, 2);
+        $content .= '<!--more-->';
+        $content = wpautop($content);
+        $read_more = '<a href="?module=article&action=show&id='. $article_id .'#more-2"'
+                    . ' class="more-link">继续阅读 <span class="meta-nav">&rarr;</span></a>';
+        $content = str_replace('<!--more-->', $read_more, $content);
+    }
+    else {
+        $content = wpautop($content);
+    }
+    return $content;
 }
 
 
-class BlogLoader extends Loader
+class BlogDelegate extends PageDelegate
 {
     /*博客配置项*/
     public function get_options($master=null)
@@ -69,9 +80,9 @@ class BlogLoader extends Loader
 
 class BasePage extends Page
 {
-    public $models = array();
+    //public $models = array();
     
-    public function __get($key)
+    /*public function __get($key)
     {
         if (array_key_exists($key, $this->models)) {
             $model = $this->models[$key];
@@ -85,20 +96,22 @@ class BasePage extends Page
         else {
             return parent::__get($key);
         }
-    }
+    }*/
 
     public function prepare()
     {
-        $this->loader = init('BlogLoader');
+        $this->delegate = init('BlogDelegate');
         //从数据库中读取全局配置项
         //$this->site_url = $this->options['siteurl'];
         $this->site_title = $this->options['blogname'];
         $this->site_description = $this->options['blogdescription'];
-        
-        $this->recent_articles;
-        $this->recent_comments;
-        $this->archives;
-        $this->categories;
+        //加载侧边栏
+        $this->sidebar = $this->templater->render('public/sidebar.html', array(
+            'recent_articles' => $this->recent_articles,
+            'recent_comments' => $this->recent_comments,
+            'archives' => $this->archives,
+            'categories' => $this->categories,
+        ));
     }
     
     public function query_articles()

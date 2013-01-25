@@ -3,81 +3,29 @@
  * This file is part of the CultPHP (https://github.com/azhai/cultphp)
  *
  * Copyright (c) 2012
- * author: °¢Õ® (Ryan Liu)
+ * author: é˜¿å€º (Ryan Liu)
  * date: 2013-01-16
  */
 
-/**
- * ¹ý³ÌÃèÊö£¬Ïàµ±ÓÚÒ»¸öfunction
- */
-class Procedure
-{
-    public $subject = null;
-    public $method = '';
-    public $args = array();
-
-    public function __construct($subject, $method, array $args=array())
-    {
-        $this->subject = $subject;
-        $this->method = $method;
-        if ( ! empty($args) ) {
-            $this->args = array_merge($this->args, $args);
-        }
-    }
-
-    /*Ö´ÐÐ¹ý³ÌµÃµ½½á¹û£¬Ïàµ±ÓÚPHP5.3µÄ__invoke()*/
-    public function emit()
-    {
-        $args = func_get_args();
-        if ( ! empty($args) ) {
-            $this->args = array_merge($this->args, $args);
-        }
-        $func = empty($this->subject) ? $this->method : array($this->subject, $this->method);
-        return call_user_func_array($func, $this->args);
-    }
-}
+require_once LIBRARY_DIR . DS . 'cult' . DS . 'struct.php';
 
 
 /**
- * ¹¹ÔìÆ÷
- **/
-class Constructor extends Procedure
-{
-    public function __construct($subject, array $args=array())
-    {
-        parent::__construct($subject, '__construct', $args);
-    }
-
-    public function emit()
-    {
-        $subject = $this->subject;
-        if ( empty($this->args) ) {
-            return new $this->subject;
-        }
-        else {
-            $ref = new ReflectionClass($this->subject);
-            return $ref->newInstanceArgs($this->args);
-        }
-    }
-}
-
-  
-/**
- * »ù´¡»º´æÀà
+ * åŸºç¡€ç¼“å­˜
  */
 abstract class BaseCache
 {
     const KEY_SEPERATOR = '.';
     public $backend = null;
-    public $namespaces = '*'; //ÔÊÐíµÄÃû³Æ¿Õ¼ä
+    public $namespaces = '*'; //å…è®¸çš„åç§°ç©ºé—´
 
     public function __construct(array $namespaces=null)
     {
         if ( ! empty($namespaces) ) {
-            if ( is_array($this->namespaces) ) { //À©³ä
+            if ( is_array($this->namespaces) ) { //æ‰©å……
                 $this->namespaces = array_merge($this->namespaces, $namespaces);
             }
-            else { //ÏÞÖÆ
+            else { //é™åˆ¶
                 $this->namespaces = $namespaces;
             }
         }
@@ -134,9 +82,9 @@ abstract class BaseCache
     public function retrieve($ns, $key, $proc, $ttl=0)
     {
         $value = $this->get($ns, $key);
-        if ( is_null($value) ) { //²»´æÔÚ£¬³¢ÊÔ´´½¨
+        if ( is_null($value) ) { //ä¸å­˜åœ¨ï¼Œå°è¯•åˆ›å»º
             $value = $proc instanceof Procedure ? $proc->emit() : $proc;
-            if ( ! is_null($value) ) { //³É¹¦´´½¨
+            if ( ! is_null($value) ) { //æˆåŠŸåˆ›å»º
                 $this->put($ns, $key, $value, $ttl);
             }
         }
@@ -162,11 +110,11 @@ abstract class BaseCache
 
 
 /**
- * ÐéÄâ»º´æÀà£¬ËæPHP½ø³ÌÒ»ÆðÏûÊ§
+ * è™šæ‹Ÿç¼“å­˜ï¼ŒéšPHPè¿›ç¨‹ä¸€èµ·æ¶ˆå¤±
  */
 class DummyCache extends BaseCache
 {
-    protected static $_storage_ = array(); //¶ÔÏó×¢²á±í
+    protected static $_storage_ = array(); //å¯¹è±¡æ³¨å†Œè¡¨
 
     protected function _get($ns, $key, $default=null)
     {
@@ -214,12 +162,12 @@ class DummyCache extends BaseCache
 
 
 /**
- * ÎÄ¼þ»º´æÀà
+ * æ–‡ä»¶ç¼“å­˜
  */
 class FileCache extends BaseCache
 {
     public $cache_dir = '';
-    public $forever = false; //$forever === trueÊ±²»½«expireÊ±¼äÐ´ÈëÎÄ¼þ
+    public $forever = false; //$forever === trueæ—¶ä¸å°†expireæ—¶é—´å†™å…¥æ–‡ä»¶
     public $file_mode = 0777;
 
     public function __construct($cache_dir, array $namespaces=null,
@@ -233,15 +181,14 @@ class FileCache extends BaseCache
 
     protected function _read($filename)
     {
-        return (include $filename);
+        return file_get_contents($filename);
     }
 
     protected function _write($filename, $cell)
     {
         @touch($filename);
         @chmod($filename, $this->file_mode);
-        $content = "<?php \nreturn " . var_export($cell, true) . ";\n";
-        file_put_contents($filename, $content, LOCK_EX);
+        file_put_contents($filename, strval($cell), LOCK_EX);
     }
 
     protected function _get($ns, $key, $default=null)
@@ -296,11 +243,30 @@ class FileCache extends BaseCache
 
 
 /**
- * ÐòÁÐ»¯»º´æÀà
+ * æ•°æ®æ–‡ä»¶ç¼“å­˜
+ */
+class DataFileCache extends FileCache
+{
+    protected function _read($filename)
+    {
+        return (include $filename);
+    }
+
+    protected function _write($filename, $cell)
+    {
+        @touch($filename);
+        @chmod($filename, $this->file_mode);
+        $content = "<?php \nreturn " . var_export($cell, true) . ";\n";
+        file_put_contents($filename, $content, LOCK_EX);
+    }
+}
+
+
+/**
+ * åºåˆ—åŒ–æ–‡ä»¶ç¼“å­˜
  */
 class SerializeCache extends FileCache
 {
-
     protected function _read($filename)
     {
         return unserialize( file_get_contents($filename) );
@@ -317,7 +283,7 @@ class SerializeCache extends FileCache
 
 
 /**
- * APC»º´æÀà
+ * APCç¼“å­˜
  */
 class ApcCache extends BaseCache
 {
@@ -399,7 +365,7 @@ class ApcCache extends BaseCache
 
 
 /**
- * Memcached»º´æÀà
+ * Memcachedç¼“å­˜
  */
 class MemcachedCache extends BaseCache
 {

@@ -81,13 +81,13 @@ class MyReflection extends Database\Reflection\ConventionalReflection
 }
 
 
-class NetteTwigLoader extends Loader
+class NetteTwigDelegate extends Delegate
 {
     /*Twig模板引擎*/
-    public function get_templater($master=null)
+    public function get_templater($container=null)
     {
-        $template_dir = $master->get_conf_item('template_dir');
-        $template_cache_dir = $master->get_conf_item('template_cache_dir', '');
+        $template_dir = $container->get_config('template_dir');
+        $template_cache_dir = $container->get_config('template_cache_dir', '');
         if (file_exists($template_dir)) {
             $env_config = array('debug'=>true);
             if (! empty($template_cache_dir)) {
@@ -104,12 +104,12 @@ class NetteTwigLoader extends Loader
     }
     
     /*Nette ORM*/
-    public function get_db($master=null)
+    public function get_db($container=null)
     {
-        $config = $master->get_conf_item('db');
-        $relations = $master->get_conf_item('relations', array());
-        $primaries = $master->get_conf_item('primaries', array());
-        $primary_key = $master->get_conf_item('primary_key', 'id');
+        $config = $container->get_config('db');
+        $relations = $container->get_config('relations', array());
+        $primaries = $container->get_config('primaries', array());
+        $primary_key = $container->get_config('primary_key', 'id');
         if (is_array($config)) {
             $dsn = 'mysql:host=' . $config['host'] . ';dbname=' . $config['dbname'];
             $db = new Database\Connection($dsn, $config['user'], $config['password']);

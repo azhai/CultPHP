@@ -9,6 +9,127 @@
 
 require_once LIBRARY_DIR . DS . 'cult' . DS . 'cache.php';
 
+
+/**
+ * 简单的数据库连接
+ */
+class Database extends PDO
+{
+    public $table_prefix = ''; //表名前缀
+    
+    /*将字段与值组成查询条件*/
+    public static function assign($key, $val)
+    {
+        if (is_null($val)) {
+            $value = array();
+            $cond = "`$key` IS NULL";
+        }
+        else {
+            $value =  is_array($val) ? $val : array($val);
+            $length = count($value);
+            if ($length == 1) {
+                $cond = "`$key`=?";
+            }
+            else {
+                $placeholder = rtrim(str_repeat('?,', $length), ',');
+                $cond = "`$key` IN ($placeholder)";  
+            }
+        }
+        return array($cond, $value);
+    }
+
+    /*将字段与值组成查询条件*/
+    public static function to_sql($table, array $assigns=array(), 
+                        $addition='', array $params=array(), $columns='*')
+    {
+    }
+
+    public function set_table_prefix($table_prefix='')
+    {
+        $this->table_prefix = $table_prefix;
+    }
+    
+    /*执行只读查询*/
+    public function exec_query($table, array $assigns=array(), 
+                        $addition='', array $params=array(), $columns='*')
+    {
+        $table = trim($table);
+        $addition = trim($addition);
+        $columns = trim($columns);
+
+        $conds = array();
+        $args = array();
+        if (! empty($assigns)) {
+            foreach ($assigns as $key => $val) {
+                list($cond, $value) = self::assign($key, $val);
+                array_push($conds, $cond);
+                $args = array_merge($args, $value);
+            }
+        }
+
+        $condition = implode(' AND ', $conds);
+        if (! empty($addition)) {
+            @list($first, $second, $tail) = explode(' ', strtoupper($addition), 3);
+            if ($first === 'OR') {
+                $condition = "($condition) " . $addition;
+            }
+            else if ($second === 'BY' && in_array($first,array('GROUP','ORDER'))
+                        || in_array($first,array('LIMIT','AND'))) {
+                $condition .= " " . $addition;
+            }
+            else {
+                $condition .= " AND " . $addition;
+            }
+            $args = array_merge($args, $params);
+        }
+        $prefix = $this->table_prefix;
+        $sql = "SELECT $columns FROM `$prefix$table`";
+        if (! empty($condition)) {
+            $sql .= " WHERE $condition";
+        }
+        $stmt = $this->prepare($sql);
+        $stmt->execute($args);
+        //echo vsprintf(str_replace("?", "'%s'", $sql), $args), "; <br>\n";
+        return $stmt;
+    }
+
+    /*外键查询*/
+    public function relate_stmt(PDOStatement $stmt, array $relations=array())
+    {
+        $result = array();
+        $foreigns = array();
+        foreach ($relations as $name => $relation) {
+            @list($table, $fkey, $pkey) = $relation;
+            $relations[$name][1] = empty($fkey) ? ($name . '_id') : $fkey;
+            $relations[$name][2] = empty($pkey) ? 'id' : $pkey;
+            $foreigns[$name] = array();
+        }            
+        while ($obj = $stmt->fetch(PDO::FETCH_OBJ)) {
+            $result[] = $obj;
+            foreach ($relations as $name => $relation) {
+                list($table, $fkey, $pkey) = $relation;
+                $foreigns[$name][$obj->$fkey] = null;
+            }
+        }
+        
+        foreach ($relations as $relation) {
+            list($table, $fkey, $pkey) = $relation;
+            $stmt = $this->exec_query($table, array($pkey=>array_keys($foreigns[$name])));
+            while ($fobj = $stmt->fetch(PDO::FETCH_OBJ)) {
+                $foreigns[$name][$fobj->$pkey] = $fobj;
+            }
+        }
+        foreach ($result as $i => $obj) {
+            foreach ($relations as $name => $relation) {
+                list($table, $fkey, $pkey) = $relation;
+                $result[$i]->$name = $foreigns[$name][$obj->$fkey];
+            }
+        }
+        return $result;
+    }
+}
+
+
 /**
  * 模型行为
  */

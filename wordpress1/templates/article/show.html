@@ -13,7 +13,7 @@ $this->block_start('content');
 
     <div class="entry-content">
         <p>
-<?php echo $article->post_content ?>
+<?php echo wpautop($article->post_content) ?>
         </p>
     </div><!-- .entry-content -->
         
@@ -44,6 +44,6 @@ $this->block_start('content');
 </nav><!-- .nav-single -->
 
 <?php
-include $this->template_dir . DS . 'public/post_comment.html';
+$this->include_tpl('public/post_comment.html');
 $this->block_end();
 ?>

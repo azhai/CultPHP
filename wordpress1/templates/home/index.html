@@ -18,8 +18,7 @@ $this->block_start('content');
 
     <div class="entry-content">
         <p>
-<?php echo less_content($article->post_content) ?>
-        <br /><a href="?module=article&action=show&id=<?php echo $article->ID ?>#more-<?php echo $article->ID ?>" class="more-link">继续阅读 <span class="meta-nav">&rarr;</span></a>
+<?php echo less_content($article->post_content, $article->ID) ?>
         </p>
     </div><!-- .entry-content -->
     

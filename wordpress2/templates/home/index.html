@@ -1,7 +1,6 @@
 {% extends 'public/base.html' %}
 
- {% block content %}
-
+{% block content %}
 {% for article in articles%}
 <article id="post-{{ article.ID }}" class="post-{{ article.ID }} post type-post status-publish format-standard hentry category-design tag-css tag-font-size tag-83">
     <header class="entry-header">
@@ -17,8 +16,7 @@
 
     <div class="entry-content">
         <p>
-{{ article.post_content|less }}
-        <br /><a href="?module=article&action=show&id={{ article.ID }}#more-{{ article.ID }}" class="more-link">继续阅读 <span class="meta-nav">&rarr;</span></a>
+{{ article.post_content|less(article.ID)|raw }}
         </p>
     </div><!-- .entry-content -->
     

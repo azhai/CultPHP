@@ -4,23 +4,6 @@ require_once APPLICATION_DIR . DS . 'common.php';
 
 class ArticleShowPage extends BasePage
 {
-    /*public $models = array(
-        'articles' => array(
-            'table_name' => 'posts',
-            'assigns' => array('post_type'=>'post', 'post_status'=>'publish')
-        ),
-    );
-
-    public function action()
-    {
-        $this->id = $this->request->get('id', 0, 'intval');
-        $article = $this->articles->get($this->id);
-        $article->post_date = date_create($article->post_date);
-        $article->categories = array();
-        $article->tags = array();
-        $this->article = $article;
-    }*/
-
     public function action()
     {
         $this->id = $this->request->get('id', 0, 'intval');

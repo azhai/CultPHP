@@ -1,5 +1,5 @@
 {% extends 'public/base.html' %}
-        
+
 {% block content %}                
 <article id="post-{{ article.ID }}" class="post-{{ article.ID }} post type-post status-publish format-standard hentry category-software">
     <header class="entry-header">
@@ -11,7 +11,7 @@
 
     <div class="entry-content">
         <p>
-{% autoescape 'html' %}{{ article.post_content|escape }}{% endautoescape %}
+{{ article.post_content|autop|raw }}
         </p>
     </div><!-- .entry-content -->
         
@@ -40,6 +40,5 @@
     <span class="nav-previous"><a href="{{ site_url }}?p=1" rel="prev"><span class="meta-nav">←</span>My First Post</a></span>
     <span class="nav-next"></span>
 </nav><!-- .nav-single -->
-
 {% include 'public/post_comment.html' %}
 {% endblock %}
