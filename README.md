@@ -1,9 +1,11 @@
-cultphp
+Pram
 ===========
 
-CultPHP is a php framework. 
+简单够用的PHP框架
 
-There are some clones of open source projects write in CultPHP.
+Pram is a php framework. 
+
+There are some clones of open source projects write in Pram.
 
  * wordpress1 : WordPress clone
 
